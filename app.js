@@ -1,8 +1,8 @@
 new Vue({
     el: "#app",
     data: {
-        health: 100,
-        healthMonster: 100,
+        playerHealth: 100,
+        monsterHealth: 100,
         isGameStarted: false,
         logs: []
     },
