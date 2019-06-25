@@ -15,6 +15,8 @@ new Vue({
         startNewGame: function () {
             console.log('startNewGame');
             this.isGameStarted = true;
+            this.playerHealth = 100;
+            this.monsterHealth = 100;
         },
         attack: function () {
             console.log('attack');
