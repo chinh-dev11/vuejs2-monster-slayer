@@ -79,7 +79,7 @@ new Vue({
             }
         },
         giveUp: function () {
-            console.log('giveUp');
+            this.isGameStarted = false;
         },
         addLog: function () {
             console.log('addLog');
