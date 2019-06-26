@@ -5,7 +5,7 @@ new Vue({
         playerHealth: 100,
         monsterHealth: 100,
         isGameStarted: false,
-        damage: {
+        attackDamage: {
             player: {
                 min: 5,
                 max: 12
@@ -14,21 +14,26 @@ new Vue({
                 min: 3,
                 max: 10
             },
+            special: {
+                min: 10,
+                max: 20
+            }
         },
+        healDamage: 10,
         logs: []
     },
     // KIM: computed (cached), if being used in templates, gets executed ONLY if dependent data property changes
     computed: {}, // dependent properties - synchronous tasks
-    // KIM: watch gets executed at every data property (counter1) changes - use as scarcely as possible (performance perspective)
+    // KIM: watch gets executed at every data property changes - use as scarcely as possible (performance perspective)
     watch: { // execute upon data changes - asynchronous tasks
         // watchers are to be used as scarcely as possible - performance perspective
-        /* playerHealth: function (damage) {
-            if (damage <= 0) {
+        /* playerHealth: function (attackDamage) {
+            if (attackDamage <= 0) {
                 this.endGame('player');
             }
         },
-        monsterHealth: function (damage) {
-            if (damage <= 0) {
+        monsterHealth: function (attackDamage) {
+            if (attackDamage <= 0) {
                 this.endGame('monster');
             }
         } */
@@ -40,22 +45,38 @@ new Vue({
             this.monsterHealth = 100;
         },
         attack: function () {
-            this.monsterHealth -= this.calculateDamage(this.damage.monster.min, this.damage.monster.max);
+            this.monsterHealth -= this.calculateDamage(this.attackDamage.monster.min, this.attackDamage.monster.max);
             if (this.isGameEnded(this.monsterHealth)) {
                 this.endGame('monster');
-                return;
+                return; // to not continue with playerHealth calculation if game is ended
             }
 
-            this.playerHealth -= this.calculateDamage(this.damage.player.min, this.damage.player.max);
+            this.playerHealth -= this.calculateDamage(this.attackDamage.player.min, this.attackDamage.player.max);
             if (this.isGameEnded(this.playerHealth)) {
                 this.endGame('player');
             }
         },
         specialAttack: function () {
-            console.log('specialAttack');
+            this.monsterHealth -= this.calculateDamage(this.attackDamage.special.min, this.attackDamage.special.max);
+            if (this.isGameEnded(this.monsterHealth)) {
+                this.endGame('monster');
+                return; // to not continue with playerHealth calculation if game is ended
+            }
+
+            this.playerHealth -= this.calculateDamage(this.attackDamage.player.min, this.attackDamage.player.max);
+            if (this.isGameEnded(this.playerHealth)) {
+                this.endGame('player');
+            }
         },
         heal: function () {
-            console.log('heal');
+            if (this.playerHealth <= 90) {
+                this.playerHealth += this.healDamage;
+            }
+
+            this.playerHealth -= this.calculateDamage(this.attackDamage.player.min, this.attackDamage.player.max);
+            if (this.isGameEnded(this.playerHealth)) {
+                this.endGame('player');
+            }
         },
         giveUp: function () {
             console.log('giveUp');
