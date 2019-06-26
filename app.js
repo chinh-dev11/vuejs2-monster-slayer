@@ -20,7 +20,7 @@ new Vue({
             }
         },
         healDamage: 10,
-        logs: []
+        turns: []
     },
     // KIM: computed (cached), if being used in templates, gets executed ONLY if dependent data property changes
     computed: {}, // dependent properties - synchronous tasks
@@ -43,46 +43,55 @@ new Vue({
             this.isGameStarted = true;
             this.playerHealth = 100;
             this.monsterHealth = 100;
+            this.turns = [];
         },
         attack: function () {
-            this.monsterHealth -= this.calculateDamage(this.attackDamage.monster.min, this.attackDamage.monster.max);
+            var damage = this.calculateDamage(this.attackDamage.monster.min, this.attackDamage.monster.max);
+            this.monsterHealth -= damage;
+            this.logTurn(true, damage);
             if (this.isGameEnded(this.monsterHealth)) {
                 this.endGame('monster');
                 return; // to not continue with playerHealth calculation if game is ended
             }
 
-            this.playerHealth -= this.calculateDamage(this.attackDamage.player.min, this.attackDamage.player.max);
+            damage = this.calculateDamage(this.attackDamage.player.min, this.attackDamage.player.max);
+            this.playerHealth -= damage;
+            this.logTurn(false, damage);
             if (this.isGameEnded(this.playerHealth)) {
                 this.endGame('player');
             }
         },
         specialAttack: function () {
-            this.monsterHealth -= this.calculateDamage(this.attackDamage.special.min, this.attackDamage.special.max);
+            var damage = this.calculateDamage(this.attackDamage.special.min, this.attackDamage.special.max);
+            this.monsterHealth -= damage;
+            this.logTurn(true, damage, true);
             if (this.isGameEnded(this.monsterHealth)) {
                 this.endGame('monster');
                 return; // to not continue with playerHealth calculation if game is ended
             }
 
-            this.playerHealth -= this.calculateDamage(this.attackDamage.player.min, this.attackDamage.player.max);
+            damage = this.calculateDamage(this.attackDamage.player.min, this.attackDamage.player.max);
+            this.playerHealth -= damage;
+            this.logTurn(false, damage, true);
             if (this.isGameEnded(this.playerHealth)) {
                 this.endGame('player');
             }
         },
         heal: function () {
+            var damage = this.calculateDamage(this.attackDamage.player.min, this.attackDamage.player.max);
+
             if (this.playerHealth <= 90) {
                 this.playerHealth += this.healDamage;
             }
 
-            this.playerHealth -= this.calculateDamage(this.attackDamage.player.min, this.attackDamage.player.max);
+            this.playerHealth -= damage;
+            this.logTurn(false, damage);
             if (this.isGameEnded(this.playerHealth)) {
                 this.endGame('player');
             }
         },
         giveUp: function () {
             this.isGameStarted = false;
-        },
-        addLog: function () {
-            console.log('addLog');
         },
         calculateDamage: function (min, max) {
             // Math.random(): 0...1 (1 exclusive)
@@ -104,6 +113,14 @@ new Vue({
             } else {
                 this.isGameStarted = false;
             }
+        },
+        logTurn: function (isPlayer, damage, isHardAttack) {
+            var hardAttackText = isHardAttack ? 'hard ' : '';
+            var logText = isPlayer ? 'Player hits Monster ' + hardAttackText + 'for ' : 'Monster hits Player ' + hardAttackText + 'for ';
+            this.turns.unshift({
+                isPlayer: isPlayer,
+                text: logText + damage
+            });
         }
     }
 });
